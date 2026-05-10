@@ -2,6 +2,8 @@ package me.hsgamer.bettereconomy.hook.vault;
 
 import me.hsgamer.bettereconomy.BetterEconomy;
 import me.hsgamer.bettereconomy.Utils;
+import me.hsgamer.bettereconomy.config.MainConfig;
+import me.hsgamer.bettereconomy.holder.EconomyHolder;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.OfflinePlayer;
@@ -30,56 +32,56 @@ public class VaultEconomyHook implements Economy {
 
     @Override
     public int fractionalDigits() {
-        return instance.getMainConfig().getFractionalDigits();
+        return instance.get(MainConfig.class).getFractionalDigits();
     }
 
     @Override
     public String format(double amount) {
-        return instance.getMainConfig().format(amount);
+        return instance.get(MainConfig.class).format(amount);
     }
 
     @Override
     public String currencyNamePlural() {
-        return instance.getMainConfig().getCurrencyPlural();
+        return instance.get(MainConfig.class).getCurrencyPlural();
     }
 
     @Override
     public String currencyNameSingular() {
-        return instance.getMainConfig().getCurrencySingular();
+        return instance.get(MainConfig.class).getCurrencySingular();
     }
 
     @Override
     public boolean hasAccount(OfflinePlayer player) {
-        return instance.getEconomyHandler().hasAccount(Utils.getUniqueId(player));
+        return instance.get(EconomyHolder.class).hasAccount(player.getUniqueId());
     }
 
     @Override
     public double getBalance(OfflinePlayer player) {
-        return instance.getEconomyHandler().get(Utils.getUniqueId(player));
+        return instance.get(EconomyHolder.class).get(Utils.getUniqueId(player));
     }
 
     @Override
     public boolean has(OfflinePlayer player, double amount) {
-        return instance.getEconomyHandler().has(Utils.getUniqueId(player), amount);
+        return instance.get(EconomyHolder.class).has(Utils.getUniqueId(player), amount);
     }
 
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer player, double amount) {
-        return instance.getEconomyHandler().withdraw(Utils.getUniqueId(player), amount)
+        return instance.get(EconomyHolder.class).withdraw(Utils.getUniqueId(player), amount)
                 ? new EconomyResponse(amount, getBalance(player), EconomyResponse.ResponseType.SUCCESS, "Successful")
                 : new EconomyResponse(amount, getBalance(player), EconomyResponse.ResponseType.FAILURE, "Failed to withdraw");
     }
 
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer player, double amount) {
-        return instance.getEconomyHandler().deposit(Utils.getUniqueId(player), amount)
+        return instance.get(EconomyHolder.class).deposit(Utils.getUniqueId(player), amount)
                 ? new EconomyResponse(amount, getBalance(player), EconomyResponse.ResponseType.SUCCESS, "Successful")
                 : new EconomyResponse(amount, getBalance(player), EconomyResponse.ResponseType.FAILURE, "Failed to deposit");
     }
 
     @Override
     public boolean createPlayerAccount(OfflinePlayer player) {
-        return instance.getEconomyHandler().createAccount(Utils.getUniqueId(player));
+        return instance.get(EconomyHolder.class).createAccount(player.getUniqueId());
     }
 
     //region Expanded Methods

@@ -6,7 +6,7 @@
 
     <groupId>me.hsgamer</groupId>
     <artifactId>bettereconomy</artifactId>
-    <version>2.14-FWMC-2</version>
+    <version>4.2-FWMC</version>
     <packaging>jar</packaging>
 
     <name>BetterEconomy</name>
@@ -14,7 +14,9 @@
     <description>A simple Economy plugin</description>
     <properties>
         <java.version>1.8</java.version>
-        <core.version>4.3.9</core.version>
+        <minelib.version>1.3.0</minelib.version>
+        <core.version>4.7.6</core.version>
+        <topper.version>4.6.0</topper.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -24,7 +26,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.14.1</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
@@ -33,7 +35,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -52,6 +54,14 @@
                                     <pattern>org.bstats</pattern>
                                     <shadedPattern>me.hsgamer.bettereconomy.bstats</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>io.github.projectunified.minelib</pattern>
+                                    <shadedPattern>me.hsgamer.bettereconomy.minelib</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>me.hsgamer.topper</pattern>
+                                    <shadedPattern>me.hsgamer.bettereconomy.topper</shadedPattern>
+                                </relocation>
                             </relocations>
                             <filters>
                                 <filter>
@@ -62,6 +72,14 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <!-- Disable PaperMC's PluginRemapper -->
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <paperweight-mappings-namespace>mojang</paperweight-mappings-namespace>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
@@ -89,16 +107,12 @@
             <url>https://jitpack.io</url>
         </repository>
         <repository>
-            <id>other-developers</id>
-            <url>https://repo.mrivanplays.com/repository/other-developers/</url>
-        </repository>
-        <repository>
             <id>codemc-repo</id>
             <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>
         <repository>
-            <id>placeholderapi</id>
-            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+            <id>helpchat-repo-releases</id>
+            <url>https://repo.helpch.at/releases</url>
         </repository>
     </repositories>
 
@@ -109,12 +123,7 @@
             <version>1.13.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.28</version>
-            <scope>provided</scope>
-        </dependency>
+
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
@@ -124,28 +133,19 @@
         <dependency>
             <groupId>me.lokka30</groupId>
             <artifactId>treasury-api</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
-            <version>2.11.3</version>
+            <version>2.11.7</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>me.hsgamer</groupId>
             <artifactId>hscore-common</artifactId>
-            <version>${core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>me.hsgamer</groupId>
-            <artifactId>hscore-bukkit-baseplugin</artifactId>
-            <version>${core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>me.hsgamer</groupId>
-            <artifactId>hscore-bukkit-command-sub</artifactId>
             <version>${core.version}</version>
         </dependency>
         <dependency>
@@ -165,33 +165,91 @@
         </dependency>
         <dependency>
             <groupId>me.hsgamer</groupId>
-            <artifactId>hscore-builder</artifactId>
+            <artifactId>hscore-config-gson</artifactId>
             <version>${core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>me.hsgamer</groupId>
             <artifactId>hscore-database-client-java</artifactId>
             <version>${core.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>minelib-plugin-base</artifactId>
+            <version>${minelib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>minelib-plugin-listener</artifactId>
+            <version>${minelib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>minelib-plugin-command</artifactId>
+            <version>${minelib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>minelib-plugin-permission</artifactId>
+            <version>${minelib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>minelib-util-subcommand</artifactId>
+            <version>${minelib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>minelib-scheduler-global</artifactId>
+            <version>${minelib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>minelib-scheduler-async</artifactId>
+            <version>${minelib.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>me.hsgamer</groupId>
-            <artifactId>hscore-database-driver-mysql</artifactId>
-            <version>${core.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.protobuf</groupId>
-                    <artifactId>protobuf-java</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.mysql</groupId>
-                    <artifactId>mysql-connector-j</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>topper-data-simple</artifactId>
+            <version>${topper.version}</version>
         </dependency>
         <dependency>
             <groupId>me.hsgamer</groupId>
-            <artifactId>hscore-database-driver-sqlite</artifactId>
-            <version>${core.version}</version>
+            <artifactId>topper-agent-core</artifactId>
+            <version>${topper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>topper-agent-snapshot</artifactId>
+            <version>${topper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>topper-agent-storage</artifactId>
+            <version>${topper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>topper-storage-flat-configfile</artifactId>
+            <version>${topper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>topper-storage-flat-converter</artifactId>
+            <version>${topper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>topper-storage-sql-sqlite</artifactId>
+            <version>${topper.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.xerial</groupId>
@@ -200,15 +258,37 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>topper-storage-sql-mysql</artifactId>
+            <version>${topper.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.mysql</groupId>
+                    <artifactId>mysql-connector-j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>topper-storage-sql-converter</artifactId>
+            <version>${topper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>topper-spigot-agent-runnable</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>24.0.1</version>
+            <version>26.0.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bukkit</artifactId>
-            <version>3.0.2</version>
+            <version>3.1.0</version>
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
