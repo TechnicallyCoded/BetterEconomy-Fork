@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jar tf *)",
+      "Read(//private/tmp/**)",
+      "Bash(jar xf *)",
+      "Bash(javap -p me/hsgamer/hscore/bukkit/config/BukkitConfig.class)"
+    ]
+  }
+}

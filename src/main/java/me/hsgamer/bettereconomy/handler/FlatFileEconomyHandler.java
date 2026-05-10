@@ -2,24 +2,33 @@ package me.hsgamer.bettereconomy.handler;
 
 import me.hsgamer.bettereconomy.BetterEconomy;
 import me.hsgamer.bettereconomy.api.AutoSaveEconomyHandler;
+import me.hsgamer.bettereconomy.util.AtomicYamlSave;
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
-import me.hsgamer.hscore.config.Config;
 import me.hsgamer.hscore.config.PathString;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class FlatFileEconomyHandler extends AutoSaveEconomyHandler {
-    private final Config config;
+    private final BukkitConfig config;
+    private final File configFile;
 
     public FlatFileEconomyHandler(BetterEconomy instance) {
         super(instance);
         this.config = new BukkitConfig(instance, "balances.yml");
+        this.configFile = new File(instance.getDataFolder(), "balances.yml");
         config.setup();
     }
 
     @Override
     protected void save() {
-        config.save();
+        try {
+            AtomicYamlSave.save(config.getOriginal(), configFile);
+        } catch (IOException e) {
+            instance.getLogger().log(Level.SEVERE, "Failed to save balances.yml", e);
+        }
     }
 
     @Override

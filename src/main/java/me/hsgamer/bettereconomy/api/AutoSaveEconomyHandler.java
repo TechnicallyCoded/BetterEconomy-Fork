@@ -1,24 +1,29 @@
 package me.hsgamer.bettereconomy.api;
 
 import me.hsgamer.bettereconomy.BetterEconomy;
-import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
-import me.hsgamer.hscore.bukkit.scheduler.Task;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class AutoSaveEconomyHandler extends EconomyHandler implements Runnable {
     private final AtomicBoolean needSaving = new AtomicBoolean();
-    private Task task;
+    private final ScheduledExecutorService executor;
 
     protected AutoSaveEconomyHandler(BetterEconomy instance) {
         super(instance);
         int period = instance.getMainConfig().getSaveFilePeriod();
         if (period >= 0) {
-            task = Scheduler.plugin(instance).async().runTaskTimer(
-                    this,
-                    instance.getMainConfig().getSaveFilePeriod(),
-                    instance.getMainConfig().getSaveFilePeriod()
-            );
+            long periodMs = period * 50L;
+            executor = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "BetterEconomy-AutoSave");
+                t.setDaemon(true);
+                return t;
+            });
+            executor.scheduleAtFixedRate(this, periodMs, periodMs, TimeUnit.MILLISECONDS);
+        } else {
+            executor = null;
         }
     }
 
@@ -27,10 +32,8 @@ public abstract class AutoSaveEconomyHandler extends EconomyHandler implements R
         if (!needSaving.get()) {
             return;
         }
-        Scheduler.plugin(instance).sync().runTask(() -> {
-            this.save();
-            needSaving.set(false);
-        });
+        this.save();
+        needSaving.set(false);
     }
 
     protected abstract void save();
@@ -41,8 +44,8 @@ public abstract class AutoSaveEconomyHandler extends EconomyHandler implements R
 
     @Override
     public void disable() {
-        if (task != null) {
-            task.cancel();
+        if (executor != null) {
+            executor.shutdown();
         }
         save();
     }
