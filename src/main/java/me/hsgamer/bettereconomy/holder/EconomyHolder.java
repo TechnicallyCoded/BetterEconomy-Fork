@@ -5,6 +5,7 @@ import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
 import me.hsgamer.bettereconomy.BetterEconomy;
 import me.hsgamer.bettereconomy.config.MainConfig;
 import me.hsgamer.bettereconomy.util.AtomicYamlSave;
+import me.hsgamer.bettereconomy.util.SingleThreadAgent;
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
 import me.hsgamer.hscore.config.Config;
 import me.hsgamer.hscore.config.gson.GsonConfig;
@@ -52,7 +53,7 @@ public class EconomyHolder extends SimpleDataHolder<UUID, Double> implements Age
         this.agents = Arrays.asList(
                 storageAgent,
                 storageAgent.getLoadAgent(this),
-                new SpigotRunnableAgent(storageAgent, AsyncScheduler.get(instance), mainConfig.getSaveFilePeriod()),
+                new SingleThreadAgent(storageAgent, "BetterEconomy-AutoSave", mainConfig.getSaveFilePeriod()),
 
                 snapshotAgent,
                 new SpigotRunnableAgent(snapshotAgent, AsyncScheduler.get(instance), mainConfig.getUpdateBalanceTopPeriod())
